@@ -1,14 +1,14 @@
 <div align="center">
 
-[![Slug Craft](https://goreportcard.com/report/github.com/mnuddindev/slugcraft)](https://github.com/mnuddindev/slugcraft.git)
+[![Slug Craft](https://via.placeholder.com/150.png?text=SlugCraft)](https://github.com/mnuddindev/slugcraft.git)
 
 # Slug Craft
 
 [![Go version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=for-the-badge&logo=go)](https://pkg.go.dev/github.com/mnuddindev/slugcraft)
-[![Go report][go_report_img]][go_report_url]
-[![Code coverage][go_code_coverage_img]](https://github.com/mnuddindev/slugcraft.git)<br/>
-[![Wiki][repo_wiki_img]][repo_wiki_url]
-[![License][repo_license_img]][repo_license_url]
+[![Go report](https://img.shields.io/badge/Go_report-A+-success?style=for-the-badge&logo=none)](https://goreportcard.com/report/github.com/mnuddindev/slugcraft)
+[![Code coverage](https://img.shields.io/badge/code_coverage-88%25-success?style=for-the-badge&logo=none)](https://github.com/mnuddindev/slugcraft.git)<br/>
+[![Wiki](https://img.shields.io/badge/docs-wiki_page-blue?style=for-the-badge&logo=none)](https://github.com/create-go-app/cli/wiki)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&logo=none)](https://github.com/mnuddindev/slugcraft/blob/main/LICENSE)
 
 **The ultimate Go package for crafting URL-friendly slugs.** Fast, flexible, and built for the real world—SlugCraft handles multilingual text, avoids collisions, and optimizes for SEO and UX like no other.
 </div>
@@ -29,16 +29,3 @@ Say goodbye to boring, brittle slug libraries. SlugCraft is here to level up you
 
 ```bash
 go get github.com/yourusername/slugcraft
-
-
-[go_version_img]: 
-[go_report_img]: https://img.shields.io/badge/Go_report-A+-success?style=for-the-badge&logo=none
-[go_report_url]: 
-[go_code_coverage_img]: https://img.shields.io/badge/code_coverage-88%25-success?style=for-the-badge&logo=none
-[go_dev_url]: 
-[repo_url]: 
-[repo_logo_url]: https://via.placeholder.com/150.png?text=SlugCraft
-[repo_license_url]: https://github.com/mnuddindev/slugcraft/blob/main/LICENSE
-[repo_license_img]: https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&logo=none
-[repo_wiki_url]: https://github.com/create-go-app/cli/wiki
-[repo_wiki_img]: https://img.shields.io/badge/docs-wiki_page-blue?style=for-the-badge&logo=none
