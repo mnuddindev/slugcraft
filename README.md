@@ -28,4 +28,4 @@ Say goodbye to boring, brittle slug libraries. SlugCraft is here to level up you
 ## Installation
 
 ```bash
-go get github.com/yourusername/slugcraft
+go get github.com/mnuddindev/slugcraft
