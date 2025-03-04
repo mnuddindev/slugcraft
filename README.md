@@ -1,6 +1,6 @@
 <div align="center">
 
-[![Slug Craft](https://via.placeholder.com/150.png?text=SlugCraft)](https://github.com/mnuddindev/slugcraft.git)
+[![Slug Craft](https://github.com/mnuddindev/slugcraft/blob/main/slugcraft_logo.png)](https://github.com/mnuddindev/slugcraft.git)
 
 # Slug Craft
 
