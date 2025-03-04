@@ -101,7 +101,7 @@ func (cfg *Config) EnsureUnique(ctx context.Context, slug string) string {
 		case "version":
 			candidate = fmt.Sprintf("%s-v%d", base, i)
 		case "revision":
-			fmt.Sprintf("%s-rev%d", base, i)
+			candidate = fmt.Sprintf("%s-rev%d", base, i)
 		}
 		if !cfg.Cache.Get(candidate) {
 			return candidate // When find a new one
