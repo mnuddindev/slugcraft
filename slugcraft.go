@@ -107,11 +107,14 @@ func (cfg *Config) EnsureUnique(ctx context.Context, slug string) string {
 			return candidate // When find a new one
 		}
 	}
-
-	return ""
 }
 
 // Transliterate converts text to a Latin-based slug using language-specific rules
-func (cfg *Config) Transliterate(input, lang string) (string, error) {
-	return "", nil
-}
+// func (cfg *Config) Transliterate(input, lang string) (string, error) {
+// 	trans := LanguageTransformer(lang)
+// 	result, _, err := Transform.String(trans, input)
+// 	if err != nil {
+// 		return input, err
+// 	}
+// 	return result, nil
+// }
