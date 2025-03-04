@@ -57,7 +57,7 @@ func (cfg *Config) Make(ctx context.Context, input string) (string, error) {
 	}
 
 	// Truncate to max length
-	if len(slug) < cfg.MaxLength {
+	if cfg.MaxLength > 0 && len(slug) > cfg.MaxLength {
 		slug = slug[:cfg.MaxLength]
 	}
 

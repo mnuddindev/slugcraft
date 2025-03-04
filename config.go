@@ -36,8 +36,14 @@ type Transformer func(string) string
 func New(options ...Options) *Config {
 	cfg := &Config{
 		PipeLine: []Transformer{
-			strings.ToLower,
-			func(s string) string { return strings.ReplaceAll(s, " ", "-") },
+			Lowercase(),
+			func(s string) string {
+				re := regexp.MustCompile(`[^a-z0-9]+`)
+				return re.ReplaceAllString(s, "-")
+			},
+			func(s string) string {
+				return strings.Trim(s, "-")
+			},
 		},
 		MaxLength:   220,
 		UseCache:    false,
@@ -46,6 +52,9 @@ func New(options ...Options) *Config {
 	}
 	for _, opt := range options {
 		opt(cfg)
+	}
+	if cfg.MaxLength <= 0 {
+		cfg.MaxLength = 220
 	}
 	return cfg
 }
@@ -88,6 +97,8 @@ func WithMaxLength(max int) Options {
 	return func(cfg *Config) {
 		if max > 0 {
 			cfg.MaxLength = max
+		} else {
+			cfg.MaxLength = 220
 		}
 	}
 }
