@@ -91,13 +91,15 @@ func TestMakeWithPipeline(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		slug, err := s.Make(context.Background(), tt.input)
-		if err != nil {
-			t.Errorf("Make(%q) returned error: %v", tt.input, err)
-		}
-		if slug != tt.expected {
-			t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
-		}
+		t.Run(tt.input, func(t *testing.T) {
+			slug, err := s.Make(context.Background(), tt.input)
+			if err != nil {
+				t.Errorf("Make(%q) returned error: %v", tt.input, err)
+			}
+			if slug != tt.expected {
+				t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
+			}
+		})
 	}
 }
 
@@ -108,22 +110,25 @@ func TestMakeWithCache(t *testing.T) {
 		WithSuffixStyle("numeric"),
 	)
 	tests := []struct {
+		name     string
 		input    string
 		expected string
 	}{
-		{"My Post", "my-post"},
-		{"My Post", "my-post-1"}, // Collision
-		{"My Post", "my-post-2"}, // Another collision
+		{"First", "My Post", "my-post"},
+		{"Collision1", "My Post", "my-post-1"}, // Collision
+		{"Collision2", "My Post", "my-post-2"}, // Another collision
 	}
 
 	for _, tt := range tests {
-		slug, err := s.Make(context.Background(), tt.input)
-		if err != nil {
-			t.Errorf("Make(%q) returned error: %v", tt.input, err)
-		}
-		if slug != tt.expected {
-			t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			slug, err := s.Make(context.Background(), tt.input)
+			if err != nil {
+				t.Errorf("Make(%q) returned error: %v", tt.input, err)
+			}
+			if slug != tt.expected {
+				t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
+			}
+		})
 	}
 }
 
@@ -212,21 +217,21 @@ func TestMakeBulk(t *testing.T) {
 
 // TestCacheOperations tests the in-memory cache directly.
 func TestCacheOperations(t *testing.T) {
-	c := &cache{store: make(map[string]struct{})}
+	c := &Cache{Store: make(map[string]struct{})}
 
 	// Test set and get
-	c.set("slug1")
-	if !c.get("slug1") {
+	c.Set("slug1")
+	if !c.Get("slug1") {
 		t.Errorf("cache.get('slug1') = false, expected true")
 	}
-	if c.get("slug2") {
+	if c.Get("slug2") {
 		t.Errorf("cache.get('slug2') = true, expected false")
 	}
 
 	// Test delete
-	c.set("slug2")
-	c.delete("slug2")
-	if c.get("slug2") {
+	c.Set("slug2")
+	c.Del("slug2")
+	if c.Get("slug2") {
 		t.Errorf("cache.get('slug2') after delete = true, expected false")
 	}
 }

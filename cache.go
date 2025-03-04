@@ -2,7 +2,7 @@ package slugcraft
 
 // Set adds a slug to the in-memory cache.
 func (c *Cache) Set(slug string) {
-	c.Mu.RLock()
+	c.Mu.Lock()
 	defer c.Mu.Unlock()
 	c.Store[slug] = struct{}{}
 }
@@ -10,7 +10,7 @@ func (c *Cache) Set(slug string) {
 // Get checks if a slug object exist in the cache
 func (c *Cache) Get(slug string) bool {
 	c.Mu.RLock()
-	defer c.Mu.Unlock()
+	defer c.Mu.RUnlock()
 	_, exist := c.Store[slug]
 	return exist
 }

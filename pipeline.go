@@ -1,8 +1,13 @@
 package slugcraft
 
 import (
+	"regexp"
 	"strings"
 	"unicode"
+
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 // Common transformers for pipeline
@@ -15,18 +20,20 @@ func Lowercase() Transformer {
 // RemoveDiacritics removes diacritics
 func RemoveDiacritics() Transformer {
 	return func(s string) string {
-		return strings.Map(func(r rune) rune {
-			if unicode.Is(unicode.Mn, r) {
-				return -1
-			}
-			return r
-		}, s)
+		t := transform.Chain(
+			norm.NFD,
+			runes.Remove(runes.In(unicode.Mn)),
+		)
+		result, _, _ := transform.String(t, s)
+		return result
 	}
 }
 
 // ReplaceSpaces replaces spaces with a delimeter
 func ReplaceSpaces(delimeter string) Transformer {
 	return func(s string) string {
-		return strings.ReplaceAll(s, " ", delimeter)
+		re := regexp.MustCompile(`[^a-z0-9]+`)
+		s = re.ReplaceAllString(s, delimeter)
+		return strings.Trim(s, delimeter)
 	}
 }
