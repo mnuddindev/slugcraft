@@ -2,6 +2,7 @@ package slugcraft
 
 import (
 	"context"
+	"fmt"
 	"strings"
 )
 
@@ -84,6 +85,29 @@ func (cfg *Config) MakeBulk(ctx context.Context, inputs []string) ([]string, err
 
 // EnsureUnique ensures the slug is unique using the in-memory cache.
 func (cfg *Config) EnsureUnique(ctx context.Context, slug string) string {
+	if !cfg.Cache.Get(slug) {
+		return slug // Slug is free
+	}
+
+	base := slug
+	for i := 1; ; i++ {
+		if err := ctx.Err(); err != nil {
+			return ""
+		}
+		var candidate string
+		switch cfg.SuffixStyle {
+		case "numeric":
+			candidate = fmt.Sprintf("%s-%d", base, i)
+		case "version":
+			candidate = fmt.Sprintf("%s-v%d", base, i)
+		case "revision":
+			fmt.Sprintf("%s-rev%d", base, i)
+		}
+		if !cfg.Cache.Get(candidate) {
+			return candidate // When find a new one
+		}
+	}
+
 	return ""
 }
 
