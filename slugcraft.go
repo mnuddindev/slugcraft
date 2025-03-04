@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"golang.org/x/text/transform"
 )
 
 // Make generates a slug from the input string with the configured options.
@@ -38,13 +40,13 @@ func (cfg *Config) Make(ctx context.Context, input string) (string, error) {
 	}
 
 	// Apply language-specific transliteration
-	// if cfg.Language != "" {
-	// 	var err error
-	// 	slug, err = cfg.Transliterate(slug, cfg.Language)
-	// 	if err != nil {
-	// 		return "", nil
-	// 	}
-	// }
+	if cfg.Language != "" {
+		var err error
+		slug, err = cfg.Transliterate(slug, cfg.Language)
+		if err != nil {
+			return "", nil
+		}
+	}
 
 	// Apply pipeline transformations
 	for _, t := range cfg.PipeLine {
@@ -113,11 +115,11 @@ func (cfg *Config) EnsureUnique(ctx context.Context, slug string) string {
 }
 
 // Transliterate converts text to a Latin-based slug using language-specific rules
-// func (cfg *Config) Transliterate(input, lang string) (string, error) {
-// 	trans := LanguageTransformer(lang)
-// 	result, _, err := Transform.String(trans, input)
-// 	if err != nil {
-// 		return input, err
-// 	}
-// 	return result, nil
-// }
+func (cfg *Config) Transliterate(input, lang string) (string, error) {
+	trans := LanguageTransformer(lang)
+	result, _, err := transform.String(trans, input)
+	if err != nil {
+		return input, err
+	}
+	return result, nil
+}

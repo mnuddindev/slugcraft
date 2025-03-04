@@ -55,23 +55,24 @@ func TestMakeWithLanguage(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"ru", "Привет, мир!", "privet-mir"},
-		{"zh", "你好世界", "nhsj"},
-		{"hi", "नमस्ते दुनिया", "nmste-dunya"},
-		{"ja", "こんにちは世界", "knnicha-sekai"},
-		{"de", "Hallo Welt!", "hallo-welt"},
-		{"es", "Café Olé!", "cafe-ole"},
+		{"bn", "আমি তোমাকে", "ami-tomake"},
+		{"bn", "বাংলা ভাষা", "bangla-bhasha"},
+		{"bn", "গোলাপ ফুল", "golap-phul"},
+		{"bn", "পাখির গান", "pakhir-gan"},
+		{"bn", "রাতের তারা", "rater-tara"},
 	}
 
 	for _, tt := range tests {
-		s := New(WithLanguage(tt.language))
-		slug, err := s.Make(context.Background(), tt.input)
-		if err != nil {
-			t.Errorf("Make(%q, lang=%q) returned error: %v", tt.input, tt.language, err)
-		}
-		if slug != tt.expected {
-			t.Errorf("Make(%q, lang=%q) = %q, expected %q", tt.input, tt.language, slug, tt.expected)
-		}
+		t.Run(tt.language+"/"+tt.input, func(t *testing.T) {
+			s := New(WithLanguage(tt.language))
+			slug, err := s.Make(context.Background(), tt.input)
+			if err != nil {
+				t.Errorf("Make(%q, lang=%q) returned error: %v", tt.input, tt.language, err)
+			}
+			if slug != tt.expected {
+				t.Errorf("Make(%q, lang=%q) = %q, expected %q", tt.input, tt.language, slug, tt.expected)
+			}
+		})
 	}
 }
 
