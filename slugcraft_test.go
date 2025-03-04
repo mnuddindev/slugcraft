@@ -47,3 +47,28 @@ func TestMakeBasic(t *testing.T) {
 		})
 	}
 }
+
+// TestMakeWithPipeline tests custom pipeline transformations
+func TestMakeWithPipeline(t *testing.T) {
+	s := New(WithPipeline(
+		Lowercase(),
+		RemoveDiacritics(),
+		ReplaceSpaces("-"),
+	))
+	tests := []struct {
+		Input    string
+		Expected string
+	}{
+		{"Hello, World!", "hello_world"},
+		{"Café Été München", "cafe_ete_munchen"},
+	}
+	for _, tt := range tests {
+		slug, err := s.Make(context.Background(), tt.Input)
+		if err != nil {
+			t.Errorf("Make(%q) returned error: %v", tt.Input, err)
+		}
+		if slug != tt.Expected {
+			t.Errorf("Make(%q) = %q , expected %q", tt.Input, slug, tt.Expected)
+		}
+	}
+}
