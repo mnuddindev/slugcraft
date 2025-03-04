@@ -49,3 +49,60 @@ func New(options ...Options) *Config {
 	}
 	return cfg
 }
+
+// WithPipeline sets custom transformations for the slug generation pipeline.
+func WithPipeline(transformers ...Transformer) Options {
+	return func(cfg *Config) {
+		cfg.PipeLine = transformers
+	}
+}
+
+// WithLanguage sets the language for transliteration.
+func WithLanguage(lang string) Options {
+	return func(cfg *Config) {
+		cfg.Language = lang
+	}
+}
+
+// WithUseCache enables or disables in-memory caching for uniqueness
+func WithUseCache(use bool) Options {
+	return func(cfg *Config) {
+		cfg.UseCache = use
+	}
+}
+
+// WithSuffixStyle sets the style for suffix generation ("numeric", "version", "revision")
+func WithSuffixStyle(style string) Options {
+	return func(cfg *Config) {
+		switch style {
+		case "numeric", "version", "revision":
+			cfg.SuffixStyle = style
+		default:
+			cfg.SuffixStyle = "numeric"
+		}
+	}
+}
+
+// WithMaxLength sets the maximum length of the slug
+func WithMaxLength(max int) Options {
+	return func(cfg *Config) {
+		if max > 0 {
+			cfg.MaxLength = max
+		}
+	}
+}
+
+// WithRegexFilter sets a regex pattern to filter characters
+func WithRegexFilter(pattern, replace string) Options {
+	return func(cfg *Config) {
+		cfg.RegexFilter = regexp.MustCompile(pattern)
+		cfg.RegexReplace = replace
+	}
+}
+
+// WithStopWords sets stopwords to remove from the slug
+func WithStopWords(lang string) Options {
+	return func(cfg *Config) {
+		cfg.StopWords = DefaultStopWords(lang)
+	}
+}
