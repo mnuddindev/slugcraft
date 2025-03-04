@@ -69,6 +69,19 @@ func (cfg *Config) Make(ctx context.Context, input string) (string, error) {
 	return slug, nil
 }
 
+// MakeBulk generates slugs for multilple inputs.
+func (cfg *Config) MakeBulk(ctx context.Context, inputs []string) ([]string, error) {
+	slugs := make([]string, len(inputs))
+	for i, input := range inputs {
+		slug, err := cfg.Make(ctx, input)
+		if err != nil {
+			return nil, err
+		}
+		slugs[i] = slug
+	}
+	return []string{}, nil
+}
+
 // EnsureUnique ensures the slug is unique using the in-memory cache.
 func (cfg *Config) EnsureUnique(ctx context.Context, slug string) string {
 	return ""
