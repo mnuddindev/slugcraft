@@ -38,13 +38,13 @@ func (cfg *Config) Make(ctx context.Context, input string) (string, error) {
 	}
 
 	// Apply language-specific transliteration
-	if cfg.Language != "" {
-		var err error
-		slug, err = cfg.Transliterate(slug, cfg.Language)
-		if err != nil {
-			return "", nil
-		}
-	}
+	// if cfg.Language != "" {
+	// 	var err error
+	// 	slug, err = cfg.Transliterate(slug, cfg.Language)
+	// 	if err != nil {
+	// 		return "", nil
+	// 	}
+	// }
 
 	// Apply pipeline transformations
 	for _, t := range cfg.PipeLine {
