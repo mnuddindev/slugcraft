@@ -92,7 +92,6 @@ func printUsage() {
 	})
 	fmt.Println("Examples:")
 	fmt.Println(`  slugcraft -input "বাংলা প্রিয়" -lang=bn`)
-	fmt.Println(`  slugcraft -input "Привет, мир!" -lang=ru -cache=true -suffix=version`)
 	fmt.Println(`  slugcraft -input "Hello the World" -stopwords=en -regex="[^a-z0-9-]" -replace=""`)
 	fmt.Println(`  slugcraft -input "বাংলা আমি" -lang=bn -abbr="বাংলা=BN,আমি=ME"`)
 }

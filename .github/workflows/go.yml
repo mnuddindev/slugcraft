@@ -1,0 +1,71 @@
+name: SlugCraft CI
+
+# Trigger the workflow on push or pull request to the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Define jobs
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest  # Use Ubuntu for consistency
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Set up Go environment
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'  # Match your go.mod version (or 1.24 if upgraded)
+
+      # Cache Go modules for faster builds
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      # Install dependencies
+      - name: Install Dependencies
+        run: go mod download
+
+      # Build the library and CLI
+      - name: Build
+        run: |
+          go build -v ./slugcraft  # Build library
+          go build -v ./cmd/slugcraft  # Build CLI
+
+      # Run tests
+      - name: Run Tests
+        run: go test -v ./slugcraft
+
+      # Run benchmarks
+      - name: Run Benchmarks
+        run: go test -bench=. -benchtime=1s ./slugcraft
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      # Install golangci-lint
+      - name: Install golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+
+      # Run linting
+      - name: Lint
+        run: $(go env GOPATH)/bin/golangci-lint run ./...
