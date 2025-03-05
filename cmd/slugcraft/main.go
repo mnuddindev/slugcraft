@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mnuddindev/slugcraft/"
+	slugcraft "github.com/mnuddindev/slugscraft"
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	// Create Slugger with options
-	opts := []slugcraft.Option{}
+	opts := []slugcraft.Options{}
 	if *lang != "" {
 		if *lang == "bn" || *lang == "en" {
 			opts = append(opts, slugcraft.WithLanguage(*lang))
@@ -62,7 +62,7 @@ func main() {
 		opts = append(opts, slugcraft.WithMaxLength(*maxLength))
 	}
 	if *stopwords != "" {
-		opts = append(opts, slugcraft.WithStopwords(*stopwords))
+		opts = append(opts, slugcraft.WithStopWords(*stopwords))
 	}
 	if *regex != "" {
 		opts = append(opts, slugcraft.WithRegexFilter(*regex, *regexReplace))
