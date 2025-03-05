@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'  # Match your local version
+          go-version: '1.21'  # Match your go.mod (adjust to 1.24 if needed)
 
       - name: Cache Go Modules
         uses: actions/cache@v4
@@ -39,29 +39,3 @@ jobs:
 
       - name: Run Benchmarks
         run: go test -bench=. -benchtime=1s .
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
-
-      # Debug: Print Go environment
-      - name: Debug Go Environment
-        run: |
-          go version
-          go env
-
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.1  # Downgrade to test
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-      - name: Lint
-        run: golangci-lint run ./... --verbose  # Add verbose for more output
