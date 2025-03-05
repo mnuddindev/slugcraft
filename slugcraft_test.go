@@ -264,12 +264,190 @@ func TestMakeWithContextCancel(t *testing.T) {
 	}
 }
 
-func BenchmarkTransliterateBangla(b *testing.B) {
+// TestMakeBangla tests basic Bangla transliteration.
+func TestMakeBangla(t *testing.T) {
+	s := New(WithLanguage("bn"))
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"বাংলা", "bangla"},
+		{"আমি ভালো", "ami-bhalo"},
+		{"ক্ত", "kt"},
+		{"Hello বাংলা", "hello-bangla"},
+		{"ষ্ঠান", "shthan"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			slug, err := s.Make(context.Background(), tt.input)
+			if err != nil {
+				t.Errorf("Make(%q) returned error: %v", tt.input, err)
+			}
+			if slug != tt.expected {
+				t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
+			}
+		})
+	}
+}
+
+// TestRegexFilter tests regex filter functionality.
+func TestRegexFilter(t *testing.T) {
+	s := New(
+		WithRegexFilter(`[^a-z0-9-]`, ""), // Remove everything except a-z, 0-9, -
+	)
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"Hello, World", "hello-world"},
+		{"Asho Khela hobe", "asho-khela-hobe"},
+		{"Hello, Bangla", "hello-bangla"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			slug, err := s.Make(context.Background(), tt.input)
+			if err != nil {
+				t.Errorf("Make(%q) returned error: %v", tt.input, err)
+			}
+			if slug != tt.expected {
+				t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
+			}
+		})
+	}
+}
+
+// TestStopwords tests stopword removal.
+func TestStopwords(t *testing.T) {
 	s := New(
 		WithLanguage("bn"),
+		WithStopWords("en"), // Using English stopwords for mixed text
+	)
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"বাংলা the আমি", "bangla-ami"},
+		{"প্রিয় and ক্ষমা", "priyo-khoma"},
+		{"Hello a বাংলা", "hello-bangla"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			slug, err := s.Make(context.Background(), tt.input)
+			if err != nil {
+				t.Errorf("Make(%q) returned error: %v", tt.input, err)
+			}
+			if slug != tt.expected {
+				t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
+			}
+		})
+	}
+}
+
+// TestAbbreviations tests abbreviation replacement.
+func TestAbbreviations(t *testing.T) {
+	s := New(
+		WithLanguage("bn"),
+		WithAbbreviation("বাংলা", "BN"),
+		WithAbbreviation("প্রিয়", "PR"),
+	)
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"বাংলা আমি", "bn-ami"},
+		{"প্রিয় ক্ষমা", "pr-khoma"},
+		{"Hello বাংলা", "hello-bn"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			slug, err := s.Make(context.Background(), tt.input)
+			if err != nil {
+				t.Errorf("Make(%q) returned error: %v", tt.input, err)
+			}
+			if slug != tt.expected {
+				t.Errorf("Make(%q) = %q, expected %q", tt.input, slug, tt.expected)
+			}
+		})
+	}
+}
+
+// BenchmarkTransliterateBangla measures Bangla transliteration performance.
+func BenchmarkTransliterateBangla(b *testing.B) {
+	s := New(WithLanguage("bn"))
+	input := "বাংলা প্রিয় ক্ষমা"
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input)
+	}
+}
+
+// BenchmarkPipeline measures pipeline transformation performance.
+func BenchmarkPipeline(b *testing.B) {
+	s := New(WithLanguage("bn"))
+	input := "হ্যালো, বিশ্ব! Hello World"
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input)
+	}
+}
+
+// BenchmarkRegexFilter measures regex filter performance.
+func BenchmarkRegexFilter(b *testing.B) {
+	s := New(
+		WithLanguage("bn"),
+		WithRegexFilter(`[^a-z0-9-]`, ""),
+	)
+	input := "বাংলা!@# প্রিয় 123 ক্ষমা"
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input)
+	}
+}
+
+// BenchmarkStopwords measures stopword removal performance.
+func BenchmarkStopwords(b *testing.B) {
+	s := New(
+		WithLanguage("bn"),
+		WithStopWords("en"),
+	)
+	input := "বাংলা the প্রিয় and ক্ষমা"
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input)
+	}
+}
+
+// BenchmarkAbbreviations measures abbreviation replacement performance.
+func BenchmarkAbbreviations(b *testing.B) {
+	s := New(
+		WithLanguage("bn"),
+		WithAbbreviation("বাংলা", "BN"),
+		WithAbbreviation("প্রিয়", "PR"),
 	)
 	input := "বাংলা প্রিয় ক্ষমা"
 	for i := 0; i < b.N; i++ {
 		s.Make(context.Background(), input)
+	}
+}
+
+// BenchmarkCache measures cache-based collision avoidance performance.
+func BenchmarkCache(b *testing.B) {
+	s := New(
+		WithLanguage("bn"),
+		WithUseCache(true),
+		WithSuffixStyle("numeric"),
+	)
+	input := "বাংলা"
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input) // Will generate bangla, bangla-1, etc.
+	}
+}
+
+// BenchmarkMakeBulk measures bulk slug generation performance.
+func BenchmarkMakeBulk(b *testing.B) {
+	s := New(WithLanguage("bn"))
+	inputs := []string{"বাংলা", "প্রিয়", "ক্ষমা"}
+	for i := 0; i < b.N; i++ {
+		s.MakeBulk(context.Background(), inputs)
 	}
 }

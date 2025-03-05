@@ -22,16 +22,16 @@ func TransliterateBangla(input string) string {
 		"য": "j", "র": "r", "ল": "l", "শ": "sh", "ষ": "sh", "স": "s", "হ": "h",
 
 		// Special Cases
-		"ৎ": "t", "ড়": "r", "ঢ়": "rh", "য়": "y", "ং": "ng",
+		"ৎ": "t", "ড়": "r", "ঢ়": "rh", "য়": "yo", "ং": "ng",
 
 		// Dependent Vowel Signs
 		"া": "a", "ি": "i", "ী": "ee", "ু": "u", "ূ": "oo",
-		"ে": "e", "ৈ": "oi", "ো": "o", "ৌ": "ou",
+		"ে": "e", "ৈ": "oi", "ো": "o", "ৌ": "ou", "্র": "r",
 
 		// Jukto Borno (Conjunct Consonants)
 		"ক্ত": "kt", "গ্ন": "gn", "স্ট": "st", "স্প": "sp", "শ্চ": "sch", "স্ফ": "sph",
 		"স্ত": "st", "স্ত্র": "str", "ন্ত্র": "ntr", "ম্প": "mp", "ন্ড": "nd",
-		"ঙ্ক": "nk", "ঙ্গ": "ngg", "ষ্ক": "shk", "ষ্ঠ": "shth", "ক্ষ": "kh",
+		"ঙ্ক": "nk", "ঙ্গ": "ngg", "ষ্ক": "shk", "ষ্ঠ": "shth", "ক্ষ": "kho",
 	}
 
 	for i := 0; i < len(runes); {
