@@ -1,4 +1,4 @@
-module github.com/mnuddindev/slugscraft
+module github.com/mnuddindev/slugcraft
 
 go 1.24.0
 

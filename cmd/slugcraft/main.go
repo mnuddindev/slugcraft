@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	slugcraft "github.com/mnuddindev/slugscraft"
+	slugcraft "github.com/mnuddindev/slugcraft"
 )
 
 func main() {
