@@ -8,7 +8,7 @@ import (
 // TestNew tests the default Config configuration
 func TestNew(t *testing.T) {
 	s := New()
-	if len(s.PipeLine) != 2 {
+	if len(s.PipeLine) != 3 {
 		t.Errorf("expected 2 default pipeline transformers, got %d", len(s.PipeLine))
 	}
 	if s.MaxLength != 220 {
@@ -261,5 +261,15 @@ func TestMakeWithContextCancel(t *testing.T) {
 	_, err := s.Make(ctx, "Hello, World!")
 	if err == nil {
 		t.Errorf("Make with canceled context did not return error")
+	}
+}
+
+func BenchmarkTransliterateBangla(b *testing.B) {
+	s := New(
+		WithLanguage("bn"),
+	)
+	input := "বাংলা প্রিয় ক্ষমা"
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input)
 	}
 }
