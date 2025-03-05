@@ -1,30 +1,24 @@
 name: SlugCraft CI
 
-# Trigger the workflow on push or pull request to the main branch
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# Define jobs
 jobs:
   build-and-test:
     name: Build and Test
-    runs-on: ubuntu-latest  # Use Ubuntu for consistency
-
+    runs-on: ubuntu-latest
     steps:
-      # Checkout the repository code
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Set up Go environment
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'  # Match your go.mod version (or 1.24 if upgraded)
+          go-version: '1.21'  # Match your local version
 
-      # Cache Go modules for faster builds
       - name: Cache Go Modules
         uses: actions/cache@v4
         with:
@@ -32,23 +26,19 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
-      # Install dependencies
       - name: Install Dependencies
         run: go mod download
 
-      # Build the library and CLI
       - name: Build
         run: |
-          go build -v ./slugcraft  # Build library
-          go build -v ./cmd/slugcraft  # Build CLI
+          go build -v .
+          go build -v ./cmd/slugcraft
 
-      # Run tests
       - name: Run Tests
-        run: go test -v ./slugcraft
+        run: go test -v .
 
-      # Run benchmarks
       - name: Run Benchmarks
-        run: go test -bench=. -benchtime=1s ./slugcraft
+        run: go test -bench=. -benchtime=1s .
 
   lint:
     name: Lint
@@ -62,10 +52,16 @@ jobs:
         with:
           go-version: '1.21'
 
-      # Install golangci-lint
-      - name: Install golangci-lint
-        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+      # Debug: Print Go environment
+      - name: Debug Go Environment
+        run: |
+          go version
+          go env
 
-      # Run linting
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.1  # Downgrade to test
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
       - name: Lint
-        run: $(go env GOPATH)/bin/golangci-lint run ./...
+        run: golangci-lint run ./... --verbose  # Add verbose for more output
