@@ -90,10 +90,6 @@ output: bangla-priyo
 
 ## CLI Examples
 ```shell
-# Russian slug with caching
-slugcraft -input "Привет, мир!" -lang=ru -cache=true -suffix=version
-# Output: privet-mir (then privet-mir-v1)
-
 # English with stopwords and regex
 slugcraft -input "Hello the World!" -stopwords=en -regex="[^a-z0-9-]" -replace=""
 # Output: hello-world
