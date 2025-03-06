@@ -76,6 +76,7 @@ output: bangla-priyo
 ```
 ## Available Flags
 ```shell
+Available Flags
     -input string: Text to slugify (required)
     -lang string: Language (e.g., bn, ru; optional)
     -cache bool: Enable cache for uniqueness (default: false)
