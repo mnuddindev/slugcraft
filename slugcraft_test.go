@@ -451,3 +451,21 @@ func BenchmarkMakeBulk(b *testing.B) {
 		s.MakeBulk(context.Background(), inputs)
 	}
 }
+
+func BenchmarkMakeZeroAlloc(b *testing.B) {
+	s := New(WithZeroAlloc(true))
+	input := "বাংলা প্রিয়"
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input)
+	}
+}
+
+func BenchmarkMakeLegacy(b *testing.B) {
+	s := New(WithZeroAlloc(false))
+	input := "বাংলা প্রিয়"
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		s.Make(context.Background(), input)
+	}
+}

@@ -11,63 +11,90 @@ func (cfg *Config) Make(ctx context.Context, input string) (string, error) {
 	if input == "" {
 		return "", nil
 	}
-
 	if err := ctx.Err(); err != nil {
 		return "", err
 	}
 
-	slug := input
+	// Initialize builder for both modes
+	cfg.Builder.Reset()
+	cfg.Builder.Grow(len(input))
+	cfg.Builder.WriteString(input)
 
-	// Apply abbreviaton
+	// Apply abbreviations
 	if cfg.Abbreviations != nil {
+		var temp strings.Builder
+		temp.WriteString(cfg.Builder.String())
 		for from, to := range cfg.Abbreviations {
-			slug = strings.ReplaceAll(slug, from, to)
+			tempStr := strings.ReplaceAll(temp.String(), from, to)
+			temp.Reset()
+			temp.WriteString(tempStr)
 		}
+		cfg.Builder.Reset()
+		cfg.Builder.WriteString(temp.String())
 	}
 
 	// Remove stopwords
 	if cfg.StopWords != nil {
-		words := strings.Fields(slug)
-		var filtered []string
-		for _, w := range words {
+		words := strings.Fields(cfg.Builder.String())
+		cfg.Builder.Reset()
+		for i, w := range words {
 			if _, ok := cfg.StopWords[strings.ToLower(w)]; !ok {
-				filtered = append(filtered, w)
+				if i > 0 {
+					cfg.Builder.WriteByte(' ')
+				}
+				cfg.Builder.WriteString(w)
 			}
 		}
-		slug = strings.Join(filtered, " ")
 	}
 
 	// Apply language-specific transliteration
 	if cfg.Language != "" {
-		var err error
-		slug, err = cfg.Transliterate(slug, cfg.Language)
+		result, err := cfg.Transliterate(cfg.Builder.String(), cfg.Language) // Use builder output only
 		if err != nil {
-			return "", nil
+			return "", err // Fix: return error
 		}
+		cfg.Builder.Reset()
+		cfg.Builder.WriteString(result)
 	}
 
 	// Apply pipeline transformations
 	for _, t := range cfg.PipeLine {
-		slug = t(slug)
+		t(&cfg.Builder)
 	}
 
 	// Apply regex filter
 	if cfg.RegexFilter != nil {
-		slug = cfg.RegexFilter.ReplaceAllString(slug, cfg.RegexReplace)
+		temp := cfg.RegexFilter.ReplaceAllString(cfg.Builder.String(), cfg.RegexReplace)
+		cfg.Builder.Reset()
+		cfg.Builder.WriteString(temp)
 	}
 
 	// Truncate to max length
-	if cfg.MaxLength > 0 && len(slug) > cfg.MaxLength {
-		slug = slug[:cfg.MaxLength]
+	if cfg.MaxLength > 0 && cfg.Builder.Len() > cfg.MaxLength {
+		runes := []rune(cfg.Builder.String())
+		if len(runes) > cfg.MaxLength {
+			cfg.Builder.Reset()
+			cfg.Builder.WriteString(string(runes[:cfg.MaxLength]))
+		}
 	}
 
 	// Handle uniqueness with in-memory cache
 	if cfg.UseCache {
-		slug = cfg.EnsureUnique(ctx, slug)
+		slug := cfg.EnsureUnique(ctx, cfg.Builder.String())
+		cfg.Builder.Reset()
+		cfg.Builder.WriteString(slug)
 		cfg.Cache.Set(slug)
 	}
 
-	return slug, nil
+	// Return final result
+	result := cfg.Builder.String()
+	if !cfg.ZeroAlloc {
+		// Non-zero-alloc mode creates a copy (for compatibility)
+		slug := make([]byte, len(result))
+		copy(slug, result)
+		return string(slug), nil
+	}
+	return result, nil
 }
 
 // MakeBulk generates slugs for multilple inputs.

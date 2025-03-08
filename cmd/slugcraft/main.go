@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 
 	slugcraft "github.com/mnuddindev/slugcraft"
 )
@@ -21,6 +22,8 @@ func main() {
 	regex := flag.String("regex", "", "Regex pattern to filter (e.g., [^a-z0-9-])")
 	regexReplace := flag.String("replace", "", "Replacement for regex filter")
 	abbr := flag.String("abbr", "", "Abbreviations (format: key1=value1,key2=value2)")
+	zeroalloc := flag.Bool("zeroalloc", true, "Enable zero-allocation mode (default: true)")
+	file := flag.String("file", "", "File with input strings (one per line)")
 	help := flag.Bool("help", false, "Show usage information")
 
 	flag.Parse()
@@ -44,7 +47,10 @@ func main() {
 	}
 
 	// Create Slugger with options
-	opts := []slugcraft.Options{}
+	opts := []slugcraft.Options{
+		slugcraft.WithZeroAlloc(*zeroalloc),
+	}
+
 	if *lang != "" {
 		if *lang == "bn" || *lang == "en" {
 			opts = append(opts, slugcraft.WithLanguage(*lang))
@@ -70,17 +76,50 @@ func main() {
 	for k, v := range abbreviations {
 		opts = append(opts, slugcraft.WithAbbreviation(k, v))
 	}
+	if *file != "" {
+		data, err := os.ReadFile(*file)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
+			os.Exit(1)
+		}
+		inputs := strings.Split(string(data), "\n")
+		var wg sync.WaitGroup
+		results := make(chan string, len(inputs))
+		s := slugcraft.New(opts...)
+		for _, in := range inputs {
+			if in == "" {
+				continue
+			}
+			wg.Add(1)
+			go func(input string) {
+				defer wg.Done()
+				slug, err := s.Make(context.Background(), input)
+				if err != nil {
+					results <- fmt.Sprintf("Error: %v", err)
+				} else {
+					results <- slug
+				}
+			}(in)
+		}
+		go func() {
+			wg.Wait()
+			close(results)
+		}()
+		for slug := range results {
+			fmt.Println(slug)
+		}
+	} else {
+		s := slugcraft.New(opts...)
 
-	s := slugcraft.New(opts...)
+		// Generate slug
+		slug, err := s.Make(context.Background(), *input)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
 
-	// Generate slug
-	slug, err := s.Make(context.Background(), *input)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
+		fmt.Println(slug)
 	}
-
-	fmt.Println(slug)
 }
 
 func printUsage() {
@@ -94,4 +133,5 @@ func printUsage() {
 	fmt.Println(`  slugcraft -input "বাংলা প্রিয়" -lang=bn`)
 	fmt.Println(`  slugcraft -input "Hello the World" -stopwords=en -regex="[^a-z0-9-]" -replace=""`)
 	fmt.Println(`  slugcraft -input "বাংলা আমি" -lang=bn -abbr="বাংলা=BN,আমি=ME"`)
+	fmt.Println(`  slugcraft -input "café au lait" -zeroalloc=true`)
 }

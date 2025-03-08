@@ -15,9 +15,11 @@ type Config struct {
 	StopWords     map[string]struct{} // All words that will be removed from the input if given
 	Abbreviations map[string]string   // Abbreviations that will be removed from the input if given
 	UseCache      bool                // Flag to enable in-memory caching of slug lookups
+	ZeroAlloc     bool                // Controls zero-allocation mode
 	Cache         *Cache              // In-memory cache struct
 	RegexFilter   *regexp.Regexp      // Regex pattern to replace certain characters from input if given
 	PipeLine      []Transformer       // Pipeline for step by step process
+	Builder       strings.Builder     // Buffer for zero-allocation processing
 }
 
 // Cache is a simple in-memory store for slug uniqueness.
@@ -30,23 +32,20 @@ type Cache struct {
 type Options func(*Config)
 
 // Transformer defines a function that transform a string in pipeline.
-type Transformer func(string) string
+type Transformer func(*strings.Builder)
 
 // New creates a new Config with default settings and optional configurations.
 func New(options ...Options) *Config {
 	cfg := &Config{
 		PipeLine: []Transformer{
 			Lowercase(),
-			func(s string) string {
-				re := regexp.MustCompile(`[^a-z0-9]+`)
-				return re.ReplaceAllString(s, "-")
-			},
-			func(s string) string {
-				return strings.Trim(s, "-")
-			},
+			ReplaceSpaces("-"),
+			TrimDashes(),
 		},
+		Language:    "",
 		MaxLength:   220,
 		UseCache:    false,
+		ZeroAlloc:   true,
 		SuffixStyle: "numeric",
 		Cache:       &Cache{Store: make(map[string]struct{})},
 	}
@@ -63,6 +62,13 @@ func New(options ...Options) *Config {
 func WithPipeline(transformers ...Transformer) Options {
 	return func(cfg *Config) {
 		cfg.PipeLine = transformers
+	}
+}
+
+// WithZeroAlloc enables/disables zero-allocation mode.
+func WithZeroAlloc(enabled bool) Options {
+	return func(cfg *Config) {
+		cfg.ZeroAlloc = enabled
 	}
 }
 
