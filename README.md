@@ -86,6 +86,8 @@ Available Flags
     -regex string: Regex filter pattern (e.g., [^a-z0-9-]) (optional)
     -replace string: Regex replacement (default: "")
     -abbr string: Abbreviations (e.g., বাংলা=BN,আমি=ME) (optional)
+	-zeroalloc bool: Enable zero allocation method to generate (default: true)
+	-file string: Get file name and path to generate slug from file concurrently
     -help: Show usage info
 ```
 
