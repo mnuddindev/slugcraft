@@ -2,7 +2,6 @@ package slugcraft
 
 import (
 	"context"
-	"fmt"
 	"strings"
 )
 
@@ -80,10 +79,7 @@ func (cfg *Config) Make(ctx context.Context, input string) (string, error) {
 
 	// Handle uniqueness with in-memory cache
 	if cfg.UseCache {
-		slug := cfg.EnsureUnique(ctx, cfg.Builder.String())
-		cfg.Builder.Reset()
-		cfg.Builder.WriteString(slug)
-		cfg.Cache.Set(slug)
+		cfg.EnsureUnique(ctx)
 	}
 
 	// Return final result
@@ -114,29 +110,51 @@ func (cfg *Config) MakeBulk(ctx context.Context, inputs []string) ([]string, err
 }
 
 // EnsureUnique ensures the slug is unique using the in-memory cache.
-func (cfg *Config) EnsureUnique(ctx context.Context, slug string) string {
-	if !cfg.Cache.Get(slug) {
-		return slug // Slug is free
+func (cfg *Config) EnsureUnique(ctx context.Context) {
+	if err := ctx.Err(); err != nil {
+		return
 	}
 
-	base := slug
-	for i := 1; ; i++ {
-		if err := ctx.Err(); err != nil {
-			return ""
-		}
-		var candidate string
-		switch cfg.SuffixStyle {
-		case "numeric":
-			candidate = fmt.Sprintf("%s-%d", base, i)
-		case "version":
-			candidate = fmt.Sprintf("%s-v%d", base, i)
-		case "revision":
-			candidate = fmt.Sprintf("%s-rev%d", base, i)
-		}
-		if !cfg.Cache.Get(candidate) {
-			return candidate // When find a new one
-		}
+	baseSlug := cfg.Builder.String()
+	cfg.Cache.Mu.Lock()
+	defer cfg.Cache.Mu.Unlock()
+
+	count, exists := cfg.Cache.Store[baseSlug]
+	if !exists {
+		cfg.Cache.Store[baseSlug] = 0
+		return
 	}
+
+	count++
+	cfg.Cache.Store[baseSlug] = count
+	cfg.Builder.WriteByte('-')
+	switch cfg.SuffixStyle {
+	case "numeric":
+		cfg.Builder.WriteString(itoa(count))
+	case "version":
+		cfg.Builder.WriteString("v")
+		cfg.Builder.WriteString(itoa(count))
+	case "revision":
+		cfg.Builder.WriteString("rev")
+		cfg.Builder.WriteString(itoa(count))
+	}
+	finalSlug := cfg.Builder.String()
+	cfg.Cache.Store[finalSlug] = 0
+}
+
+// itoa converts an int to string without allocation
+func itoa(n int) string {
+	if n == 0 {
+		return "0"
+	}
+	var digits [20]byte
+	i := len(digits) - 1
+	for n > 0 {
+		digits[i] = byte('0' + n%10)
+		n /= 10
+		i--
+	}
+	return string(digits[i+1:])
 }
 
 // Transliterate converts text to a Latin-based slug using language-specific rules

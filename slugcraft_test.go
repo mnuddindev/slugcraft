@@ -220,7 +220,7 @@ func TestMakeBulk(t *testing.T) {
 
 // TestCacheOperations tests the in-memory cache directly.
 func TestCacheOperations(t *testing.T) {
-	c := &Cache{Store: make(map[string]struct{})}
+	c := &Cache{Store: make(map[string]int)}
 
 	// Test set and get
 	c.Set("slug1")
@@ -434,14 +434,19 @@ func BenchmarkAbbreviations(b *testing.B) {
 
 // BenchmarkCache measures cache-based collision avoidance performance.
 func BenchmarkCache(b *testing.B) {
-	s := New(
-		WithLanguage("bn"),
-		WithUseCache(true),
-		WithSuffixStyle("numeric"),
-	)
-	input := "বাংলা"
+	cfg := New(WithLanguage("bn"), func(cfg *Config) {
+		cfg.UseCache = true
+	})
+	ctx := context.Background()
+
+	inputs := []string{
+		"আমি তোমাকে", "বাংলা ভাষা", "ক্ষমা করো",
+	}
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		s.Make(context.Background(), input) // Will generate bangla, bangla-1, etc.
+		for _, input := range inputs {
+			_, _ = cfg.Make(ctx, input)
+		}
 	}
 }
 

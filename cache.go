@@ -4,7 +4,7 @@ package slugcraft
 func (c *Cache) Set(slug string) {
 	c.Mu.Lock()
 	defer c.Mu.Unlock()
-	c.Store[slug] = struct{}{}
+	c.Store[slug] = 0
 }
 
 // Get checks if a slug object exist in the cache

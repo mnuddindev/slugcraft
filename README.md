@@ -55,7 +55,7 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	fmt.Println(slug) // Output: "bn-world"
+	fmt.Println(slug) // Will print: "bn-world"
 }
 ```
 ## CLI Installation
@@ -69,9 +69,7 @@ go install github.com/mnuddindev/slugcraft/cmd/slugcraft@latest
 Generate slugs directly from the command line:
 
 ```bash
-slugcraft -input "বাংলা প্রিয়" -lang=bn
-
-output: bangla-priyo
+slugcraft -input "বাংলা প্রিয়" -lang=bn // Will print: "bangla-priyo"
 
 ```
 ## Available Flags
@@ -95,11 +93,21 @@ Available Flags
 ```shell
 # English with stopwords and regex
 slugcraft -input "Hello the World!" -stopwords=en -regex="[^a-z0-9-]" -replace=""
-# Output: hello-world
+# Will print: hello-world
 
 # Bangla with abbreviations
 slugcraft -input "বাংলা আমি" -lang=bn -abbr="বাংলা=BN,আমি=ME"
-# Output: bn-me
+# Will print: bn-me
+```
+
+## Benchmarking
+Single Benchmark test:
+```shell
+go test -bench=BenchmarkCache -benchmem -count=6 > bench.txt
+```
+Benchmark Whole System:
+```shell
+go test -bench=. -benchmem -count=6 > bench.txt
 ```
 
 ## License

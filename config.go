@@ -26,7 +26,7 @@ type Config struct {
 // Cache is a simple in-memory store for slug uniqueness.
 type Cache struct {
 	Mu    sync.RWMutex
-	Store map[string]struct{}
+	Store map[string]int
 }
 
 // Option defines a functional option for configuring Config.
@@ -48,7 +48,7 @@ func New(options ...Options) *Config {
 		UseCache:    false,
 		ZeroAlloc:   true,
 		SuffixStyle: "numeric",
-		Cache:       &Cache{Store: make(map[string]struct{})},
+		Cache:       &Cache{Store: make(map[string]int, 1000)},
 	}
 	for _, opt := range options {
 		opt(cfg)
