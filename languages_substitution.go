@@ -261,6 +261,86 @@ func TransliterateBangla(input string, b *strings.Builder) {
 	}
 }
 
+// transliterateCyrillic handles Cyrillic script (Russian).
+func TransliterateRussian(input string, b *strings.Builder) {
+	for _, r := range input {
+		switch r {
+		case 'а':
+			b.WriteString("a")
+		case 'б':
+			b.WriteString("b")
+		case 'в':
+			b.WriteString("v")
+		case 'г':
+			b.WriteString("g")
+		case 'д':
+			b.WriteString("d")
+		case 'е':
+			b.WriteString("e")
+		case 'ё':
+			b.WriteString("yo")
+		case 'ж':
+			b.WriteString("zh")
+		case 'з':
+			b.WriteString("z")
+		case 'и':
+			b.WriteString("i")
+		case 'й':
+			b.WriteString("y")
+		case 'к':
+			b.WriteString("k")
+		case 'л':
+			b.WriteString("l")
+		case 'м':
+			b.WriteString("m")
+		case 'н':
+			b.WriteString("n")
+		case 'о':
+			b.WriteString("o")
+		case 'п':
+			b.WriteString("p")
+		case 'р':
+			b.WriteString("r")
+		case 'с':
+			b.WriteString("s")
+		case 'т':
+			b.WriteString("t")
+		case 'у':
+			b.WriteString("u")
+		case 'ф':
+			b.WriteString("f")
+		case 'х':
+			b.WriteString("kh")
+		case 'ц':
+			b.WriteString("ts")
+		case 'ч':
+			b.WriteString("ch")
+		case 'ш':
+			b.WriteString("sh")
+		case 'щ':
+			b.WriteString("shch")
+		case 'ъ':
+			b.WriteString("")
+		case 'ы':
+			b.WriteString("y")
+		case 'ь':
+			b.WriteString("")
+		case 'э':
+			b.WriteString("e")
+		case 'ю':
+			b.WriteString("yu")
+		case 'я':
+			b.WriteString("ya")
+		default:
+			if unicode.IsSpace(r) {
+				b.WriteByte(' ')
+			} else if unicode.Is(unicode.Cyrillic, r) {
+				b.WriteRune(unicode.ToLower(r))
+			}
+		}
+	}
+}
+
 // transliterateGeneric handles basic Latin normalization.
 func TransliterateGeneric(input string, b *strings.Builder) {
 	for _, r := range input {
