@@ -147,6 +147,8 @@ func (cfg *Config) Transliterate(input string) (string, error) {
 	switch cfg.Language {
 	case "bn":
 		TransliterateBangla(input, &cfg.Builder)
+	case "ru":
+		TransliterateRussian(input, &cfg.Builder)
 	default:
 		if cfg.UseUnidecode {
 			TransliterateUnidecode(input, &cfg.Builder)
