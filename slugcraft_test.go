@@ -60,6 +60,8 @@ func TestMakeWithLanguage(t *testing.T) {
 		{"bn", "গোলাপ ফুল", "golap-phul"},
 		{"bn", "পাখির গান", "pakhir-gan"},
 		{"bn", "রাতের তারা", "rater-tara"},
+		{"bn", "ক্ষমা করো", "khoma-kro"},
+		{"ru", "привет мир", "privet-mir"},
 	}
 
 	for _, tt := range tests {
