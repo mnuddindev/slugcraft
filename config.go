@@ -16,6 +16,7 @@ type Config struct {
 	Abbreviations map[string]string   // Abbreviations that will be removed from the input if given
 	UseCache      bool                // Flag to enable in-memory caching of slug lookups
 	ZeroAlloc     bool                // Controls zero-allocation mode
+	UseUnidecode  bool                // Optional unidecode fallback
 	Cache         *Cache              // In-memory cache struct
 	RegexFilter   *regexp.Regexp      // Regex pattern to replace certain characters from input if given
 	PipeLine      []Transformer       // Pipeline for step by step process
@@ -83,6 +84,13 @@ func WithLanguage(lang string) Options {
 func WithUseCache(use bool) Options {
 	return func(cfg *Config) {
 		cfg.UseCache = use
+	}
+}
+
+// WithUnidecode enables the unidecode fallback.
+func WithUnidecode(enabled bool) Options {
+	return func(cfg *Config) {
+		cfg.UseUnidecode = enabled
 	}
 }
 

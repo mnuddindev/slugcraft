@@ -49,7 +49,7 @@ func (cfg *Config) Make(ctx context.Context, input string) (string, error) {
 
 	// Apply language-specific transliteration
 	if cfg.Language != "" {
-		result, err := cfg.Transliterate(cfg.Builder.String(), cfg.Language) // Use builder output only
+		result, err := cfg.Transliterate(cfg.Builder.String()) // Use builder output only
 		if err != nil {
 			return "", err // Fix: return error
 		}
@@ -140,11 +140,25 @@ func (cfg *Config) EnsureUnique(ctx context.Context, slug string) string {
 }
 
 // Transliterate converts text to a Latin-based slug using language-specific rules
-func (cfg *Config) Transliterate(input, lang string) (string, error) {
-	var result string
-	switch lang {
+func (cfg *Config) Transliterate(input string) (string, error) {
+	cfg.Builder.Reset()
+	cfg.Builder.Grow(len(input))
+
+	switch cfg.Language {
 	case "bn":
-		result = TransliterateBangla(input)
+		TransliterateBangla(input, &cfg.Builder)
+	default:
+		if cfg.UseUnidecode {
+			TransliterateUnidecode(input, &cfg.Builder)
+		} else {
+			TransliterateGeneric(input, &cfg.Builder)
+		}
 	}
-	return result, nil
+
+	// Fail-safe ASCII fallback
+	if cfg.Builder.Len() == 0 {
+		transliterateASCIISafe(input, &cfg.Builder)
+	}
+
+	return cfg.Builder.String(), nil
 }
