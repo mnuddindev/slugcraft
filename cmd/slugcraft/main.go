@@ -11,6 +11,8 @@ import (
 	slugcraft "github.com/mnuddindev/slugcraft"
 )
 
+var Version = "v1.2.0"
+
 func main() {
 	// Define flags
 	input := flag.String("input", "", "Text to slugify")
@@ -24,6 +26,7 @@ func main() {
 	abbr := flag.String("abbr", "", "Abbreviations (format: key1=value1,key2=value2)")
 	zeroalloc := flag.Bool("zeroalloc", true, "Enable zero-allocation mode (default: true)")
 	file := flag.String("file", "", "File with input strings (one per line)")
+	version := flag.String("version", "", "Checks for the version")
 	help := flag.Bool("help", false, "Show usage information")
 
 	flag.Parse()
@@ -31,6 +34,11 @@ func main() {
 	// Show help or validate input
 	if *help || *input == "" {
 		printUsage()
+		os.Exit(0)
+	}
+
+	if len(os.Args) > 1 && os.Args[1] == *version {
+		fmt.Println(Version)
 		os.Exit(0)
 	}
 
